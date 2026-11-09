@@ -1,0 +1,7 @@
+ARCHIVIO LAZZARO — Unità 3
+Documento: LX3-4117
+Scheda di reparto — giorno operativo 03, ore 06:58
+
+Il turno batterie ha aperto la richiesta tecnica RT-3038 per il circuito AUX-3-048 di Ripetitore Velo. Durante il controllo è stata verificata solo la continuità del cavo al banco. La prova di trasmissione esterna deve essere documentata in un verbale distinto; in questa scheda non è registrata una ricevuta esterna.
+
+Il registro viene usato per ricostruire i movimenti della rete secondaria. Gli orari si riferiscono alla centrale, salvo diversa indicazione nel corpo del documento.

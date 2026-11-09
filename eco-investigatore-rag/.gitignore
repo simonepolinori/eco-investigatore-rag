@@ -1,0 +1,9 @@
+.venv/
+ambiente_eco/
+__pycache__/
+*.pyc
+.gradio/
+.cache_rag/
+diario_chat.jsonl
+contatore_gemini.json
+chiavi.txt

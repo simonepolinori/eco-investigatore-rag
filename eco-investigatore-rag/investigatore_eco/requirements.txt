@@ -1,0 +1,12 @@
+gradio
+transformers>=4.51
+accelerate
+google-genai
+sentence-transformers
+numpy
+torch
+# interfaccia con la mappa (web.py)
+uvicorn
+starlette
+python-multipart
+openpyxl            # il dossier sbloccato del Giorno 4 arriva in Excel (.xlsx)

@@ -1,0 +1,179 @@
+INVESTIGATORE ECO - SQUADRA 3 (Polinori, Lazzari, Di Porto, Puccio, Caffari, Cutilli) - GIORNO 5 (OPERAZIONE ULTIMA LUCE)
+
+MOTORE DELLE RISPOSTE: GEMINI (chiave gratis, consigliato)  ·  riserve facoltative: Groq, Cerebras, Qwen sulla GPU
+  1. Chiave gratis su https://aistudio.google.com/apikey (account Google, inizia con AIza).
+  2. MODO PIU' SEMPLICE: python app.py, aprite ⚙ Motori, scegliete «Gemini», incollate la chiave e premete
+     «Salva e prova» (resta in investigatore_eco/chiavi.txt, mai nel codice). Oppure: doppio clic su avvia_eco.bat,
+     oppure PowerShell  $env:GEMINI_API_KEY="AIza..."  (per sempre: setx GEMINI_API_KEY "AIza..."). In Colab: cella 1b.
+  3. python diagnostica.py controlla la chiave e i modelli Flash-Lite disponibili.
+  Con MOTORE = 'auto' e PRIMA_GEMINI = True (config.py) scrive Gemini; Groq/Cerebras/Grok solo se avete anche le loro chiavi.
+  Limiti gratuiti: ogni modello Gemini ha la sua quota. Se Google risponde 429 con «retry in 12s» ECO aspetta (⏳) e
+  riprova; se l'attesa e' lunga (o la quota del giorno e' finita) passa al modello successivo di MODELLI_GEMINI_RISERVA
+  (gemini-2.5-flash-lite, gemini-flash-latest, gemini-2.5-flash...) con la stessa chiave. Il prompt lungo di ECO non e'
+  un problema per Gemini (limite di token al minuto molto piu' alto di Groq).
+
+(STORICO: le note qui sotto su Groq valgono solo se usate Groq come riserva)
+
+GIORNO 5 · PRIMA DELL'ALBA · OPERAZIONE ULTIMA LUCE  (scheda: SCHEDA_GIORNO5.md)
+  Documenti finali G5-01, G5-02, G5-03 in investigatore_eco/dati/giorno5/ (fascicolo: il modello li legge sempre);
+  la scheda della missione in dati/giorno5/originali/. Nell'interfaccia: pulsante GIORNO 5 sulla mappa e sulla radio.
+  NESSUNA RISPOSTA PREIMPOSTATA: le risposte le scrive solo il modello. Senza modello ECO lo dice e mostra solo le righe
+  del tool SQL (prima la risposta la componeva il codice).
+  LA CHIAVE NON SCADE: il piano gratuito di Groq ha un limite di token AL MINUTO. Ora ECO aspetta fino a 30 s e
+  riprova (⏳ nei passi), poi cambia modello; chiave di riserva gratuita CEREBRAS (cloud.cerebras.ai, «csk-...») da
+  incollare in ⚙ Motori o in CEREBRAS_API_KEY.
+  «RISPOSTE TROPPO LUNGHE PER QUESTO MODELLO» (errore 413): ECO ora manda ai modelli con pochi token al minuto un
+  prompt COMPATTO (regole intere, i documenti piu' vicini alla domanda per intero, gli altri con il titolo) e ricorda il
+  limite di ogni modello. Prove: python prove_sql.py -> 136/136.
+
+GROQ (riserva facoltativa)
+  1. Chiave gratis su https://console.groq.com/keys (inizia con gsk_). MODO PIU' SEMPLICE: avviate ECO, aprite
+     ⚙ Motori, incollate la chiave in «Chiave API gratuita · Groq» e premete «Salva e prova»: resta in chiavi.txt.
+  2. PowerShell, nella cartella investigatore_eco:   $env:GROQ_API_KEY="gsk_..."    poi   python diagnostica.py   e   python app.py
+     (per sempre: setx GROQ_API_KEY "gsk_..." e riaprite VS Code; oppure doppio clic su avvia_eco.bat, che la chiede).
+  Con MOTORE = 'auto' (config.py) ECO usa Groq se c'e' GROQ_API_KEY, poi Grok di xAI (XAI_API_KEY), poi Gemini.
+  Modelli Groq: MODELLO_GROQ = 'auto' prova Llama 4 Scout (30 000 token al minuto nel piano gratuito), poi Llama 3.3 70B,
+  Kimi K2, GPT-OSS 120B...: se un modello e' al limite (429) ECO passa da solo al successivo. diagnostica.py li elenca.
+  Risposte lunghe: con Groq/Grok il limite e' MAX_TOKENS_COMPATIBILI = 1500 (prima 700: le risposte si fermavano a meta'
+  frase). Se Groq la taglia lo stesso (finish_reason = length) ECO chiede di continuare (CONTINUAZIONI = 2) e unisce i
+  pezzi; se la connessione cade a meta' tiene il testo gia' scritto e mette [...] in fondo. STILE_COMPATIBILI chiede
+  risposte brevi, senza titoli ne' elenchi con l'asterisco, con orari e nomi copiati esatti.
+
+DOSSIER SBLOCCATO DEL GIORNO 4 (DOSSIER_SBLOCCATO.xlsx, consegnato dopo l'accesso all'Archivio Lete)
+  I tre fogli sono nel fascicolo (sempre nel prompt): dati/giorno4/G4-01.txt Verbale del primo risveglio (03:10-03:19,
+  soggetto LZ-374, dott. P. Rinaldi), G4-02.txt Richiesta di sospensione (03:40, ricevuta dalla direzione alle 03:48),
+  G4-03.txt Direttiva DR-391 (04:10, firma S. Greco: proseguire, usare i rifugi, revoca solo con controfirma sanitaria e
+  di sicurezza). Il file originale e' in dati/giorno4/originali/. Nell'interfaccia: pulsante GIORNO 4 sulla mappa,
+  timeline, radio. Dall'Archivio (🗂) si possono caricare altri dossier .xlsx: ogni foglio diventa un documento G4-nn.
+  Domande: «Cosa dice il dossier sbloccato? Chi ha ordinato di proseguire nonostante l'allarme?», «Perché la centrale
+  manda ancora le persone nei rifugi?», «Cosa è successo alle 03:17 e alle 03:19?», «Come si revoca la direttiva DR-391?».
+
+NOVITA' · SECONDA MISSIONE DEL GIORNO 4 «IL PRIMO RESPIRO» (Squadra_3_3.zip, MISSIONE.xlsx)
+  Database: dati/database/archivio_recuperato.sqlite (gia' incluso): 14 tabelle in codice, senza dizionario.
+  RISPOSTA FINALE (parametri ufficiali della centrale: 4/11/2026 ore 12:30, lettore Canale Kappa): CHIAVE 108958,
+  terminale Canale Kappa, Mara Belli (SANITARIO, PX-117921) + Nino Conti (SICUREZZA, PX-152930), Unita' 3-Ossidiana.
+  Scenario della scheda iniziale (12:00, canale non comunicato): Rosi + Nardi (Ardesia), Kappa 580199 o Lambda 364801.
+  Dettagli, esclusi, prova finale: SCHEDA_GIORNO4_MISSIONE3.md (sezione «Aggiornamento del 23/10»).
+  Mappa delle 14 tabelle e diagrammi E/R e logico: cartella consegna_missione3/.
+  - database.py   sceglie la missione: «Il cancello nero» (sql_varco.py, accessi.sqlite, il codice di prima) oppure
+                  «Il primo respiro» (sql_lete.py). La missione si sceglie nella pagina 🗄 Schema E/R.
+  - sql_base.py   il tool di SOLA LETTURA per qualsiasi database SQLite (read-only, authorizer, una SELECT, 50 righe).
+  - sql_lete.py   mappa con le prove sui dati, verifica di TUTTE le regole in 10 query, esclusi con il motivo,
+                  informazione mancante, parametri della missione modificabili (la centrale) con confronto e storico.
+  - prove_sql.py  128 prove senza Gemini: 55 della prima missione (vecchio test) + 73 della seconda (con la 108958).
+  - schema_er.html pagina per qualsiasi database: Modello E/R, Schema logico, Mappa, Verifica, parametri e storico,
+                  console SQL, diagrammi scaricabili (SVG/PNG).
+  - in chat: «🗄 Query SQL» con parametri, query del modello, verifica, soluzioni, cosa manca, esclusi, cosa cambia.
+  - config.py: DATABASE_LETE, PARAMETRI_LETE (istante, varco, sito, canale), MISSIONE_SQL, SQL_PASSI.
+  Domande di prova: «Chi sono i due operatori autorizzati per il varco V-38? Con quale terminale e chiave?»,
+  «Mostra la mappa delle 14 tabelle», «E se arriviamo alle 12:30?», «La centrale comunica: il lettore del veicolo usa
+  il Canale Lambda», «Togli la sospensione di Alma Berti dal database» (rifiutata), «Dove e quando è iniziato il primo
+  focolaio?» (vecchio test: niente SQL).
+
+PRIMA MISSIONE DEL GIORNO 4 «IL CANCELLO NERO» (Missione_2.xlsx, Tool_SQL.ipynb, Squadra_3_2.zip)
+  Scoperta: codice dell'autorizzazione 263847 (Marta Riva, Cripta Nord, settore B7, pratica RV596, attivo, valido fino
+  al 12/10/2031 23:59). Dettagli, query e prove in SCHEDA_GIORNO4.md.
+  - database.py   tool SQL di SOLA LETTURA sul database degli accessi (dati/database/accessi.sqlite, gia' incluso):
+                  il modello propone la query (JSON), il codice la esegue, il risultato torna al modello; verifica dei
+                  permessi candidati; nessun codice inventato (controllo degli zeri iniziali); query di riserva senza modello.
+  - prove_sql.py  55 prove senza Gemini (python prove_sql.py; con --modello anche 4 domande vere).
+  - schema_er.html pagina dedicata «🗄 Schema E/R» (pulsante in alto o http://127.0.0.1:7860/schema-er): diagramma E/R
+                  (Chen) e schema logico interattivi, cardinalita' calcolate sui dati, query del tool evidenziate,
+                  console SQL di sola lettura, tasto «💬 Torna alla chat».
+  - in chat, sotto le risposte sul database: «🗄 Query SQL» (query, righe, verifica, impronta del file) e «📐 Schema E/R».
+  - Archivio (🗂): si caricano anche accessi.sqlite (o lo ZIP del giorno) e mappa.zip (tessere della mappa stradale).
+  - Mappa: niente piu' riquadro rosso sopra la mappa (l'informazione e' nella Guida), legenda richiudibile (◂),
+    le scritte della mappa schematica spariscono se coprono un segnalino, inquadratura che lascia libera la legenda.
+  - Vista RAG in chat e RAG View 3D: tasto «💬 Torna alla chat» (anche Esc).
+  - config.py: GIORNO = 4, OPERAZIONE, DATABASE_NOME, DATA_MISSIONE.
+
+(Sotto: le istruzioni del Giorno 3, ancora valide.)
+
+VERSIONE GIORNO 3 + IMPREVISTI G3
+
+Motore delle risposte (codice 4.1): Gemini Flash-Lite (chiave API), con Qwen3-4B-Instruct-2507 sulla GPU come riserva.
+Il modello legge: fascicolo intero (G1, G2, imprevisti) + catalogo della scansione dell'archivio digitale
++ memoria dei file emersi nella conversazione + brani trovati dal RAG (BM25 + embedding, secondo passaggio).
+Interfaccia (FINALE_5f): mappa di Roma, frequenze radio, timeline, ipotesi, imprevisti, documenti malevoli,
+azioni in millisecondi e Vista RAG sotto ogni risposta. Nuova scheda GIORNO 3 con i 5 file del dossier.
+
+AVVIO
+  1. pip install -r requirements.txt   (oppure doppio clic su avvia_eco.bat)
+  2. chiave gratis: https://aistudio.google.com/apikey -> variabile GEMINI_API_KEY (avvia_eco.bat la chiede)
+  3. python app.py                     -> interfaccia con la mappa su http://127.0.0.1:7860
+     python app.py --senza-modello     -> solo Gemini (non carica Qwen)
+     python app.py --locale            -> solo Qwen sulla GPU
+     python app.py --gradio            -> chat semplice di riserva (app_gradio.py)
+     python app.py --console           -> chat nel terminale
+  4. python diagnostica.py (chiave e GPU) · python valuta_rag.py (misura del RAG, nessuna richiesta a Gemini)
+     python calibra_intenti.py (soglie con cui ECO capisce che chiedete i file "rumore" o file a caso)
+
+COLAB: notebook_colab/ECO_FINALE_Colab.ipynb (stesso codice, archivio e 500 registri gia' inclusi;
+  8b = prove degli imprevisti G3)
+  Runtime -> T4 GPU -> Esegui tutto; cella 1b = chiave Gemini; sezione 6 = link all'interfaccia con la mappa
+  (6b = chat di riserva Gradio, 6c = caricare mappa.zip per la mappa stradale)
+
+MAPPA STRADALE: estraete il vostro mappa.zip dentro investigatore_eco (deve esserci mappa/tessere/13).
+Senza, l'interfaccia mostra la mappa schematica disegnata offline (nessun servizio esterno).
+
+VS CODE: aprite investigatore_eco/investigatore_eco_FINALE.code-workspace (oppure File -> Apri cartella -> investigatore_eco),
+  poi Esegui e debug (Ctrl+Shift+D) -> «ECO: interfaccia con la mappa».
+
+COSA FA OGNI FILE
+  app.py          avvio (interfaccia con la mappa; --gradio, --console)
+  web.py          server dell'interfaccia: passi, vista RAG, mappa, upload (archivio.importa), nuova conversazione
+  interfaccia.html la pagina
+  eco.py          risposta: fascicolo + catalogo + memoria + RAG -> motore -> controllo delle fonti
+  motori.py       Gemini Flash-Lite e Qwen sulla GPU
+  rag.py          lettura dei 4 formati, scansione storia/rumore, BM25 + embedding, ricerca,
+                  richieste esplicite dei file rumore o a caso (capite con gli embedding)
+  calibra_intenti.py controllo di quelle soglie
+  istruzioni.py   il prompt
+  archivio.py     fascicolo (dati/giorno*, dati/imprevisti*) e importazione degli ZIP
+  logica.py       regole sui documenti per la MAPPA: voci, timeline, ipotesi, malevoli (G2-04, G2-07), imprevisti
+  config.py       tutte le impostazioni
+  dati/           giorno1, giorno2, imprevisti_g2 (fascicolo) e archivio_g3 (1005 file) +
+                  archivio_imprevisti_g3 (500 registri LX3) solo via RAG
+
+RAG VIEW 3D · MAPPA DEI SIGNIFICATI (nuova): pulsante 📚 in alto (http://127.0.0.1:7860/rag3d) e, sotto ogni risposta,
+  «🧭 Vista RAG»: la mappa compare dentro la chat con la domanda (★) e le sue fonti cerchiate. Anche con doppio clic su
+  investigatore_eco/rag3d.html (senza server: la mappa funziona, le domande no).
+  Ogni punto e' un documento (1505 file dell'archivio + fascicolo G1-G5). Posizione dagli EMBEDDING del RAG:
+    asse «piu' vicino al caso» = somiglianza (coseno) con il centro dei documenti dell'indagine;
+    gli altri due assi = le due principali variazioni rimanenti (PCA). Documenti vicini parlano di cose simili.
+  Colori: rosso = pertinente (cluster dell'indagine, k-means 30 cluster); arancione = sospetto (ordini all'AI, es. G2-04);
+    grigio = altri cluster (un tono per cluster); anello = fonti dell'ultima domanda (tratteggio = trovato dal RAG).
+  Comandi: trascina per ruotare, rotella per lo zoom, clic su un punto = testo + i 6 documenti piu' simili;
+    Ferma rotazione, Vista iniziale, Solo indagine (mostra le etichette G1-..., ARCH-...), Ultima domanda della chat,
+    casella «Cerca» (solo ricerca RAG, il modello non viene chiamato). Clic sulla legenda = nasconde/mostra un gruppo.
+  Dopo aver cambiato i documenti in dati/:  python crea_rag3d.py  (in VS Code: «ECO: rigenera la RAG View 3D»).
+
+VS CODE: aprite la cartella investigatore_eco, copiate chiavi_ESEMPIO.txt come chiavi.txt con GEMINI_API_KEY e
+  GROQ_API_KEY, poi Esegui e debug (Ctrl+Shift+D) -> «ECO: Gemini + Groq (chiavi da chiavi.txt)» -> F5.
+
+DOCUMENTI PER LA CONSEGNA: SCHEDA_GIORNO3.md, MISSIONE_2_consegna.md, PROVE_TRABOCCHETTO.md, LEGGIMI_storico.txt
+
+IMPREVISTI DEL GIORNO 3 (Squadra_3_1_1.zip: 500 registri LX3 "da aggiungere all'archivio")
+  Dove vanno: dati/archivio_imprevisti_g3/ (gia' inclusi). Caricando lo ZIP dall'interfaccia finiscono li' da soli:
+  vanno nel RAG, NON nel fascicolo (500 documenti nel prompt sarebbero troppi). Il nome di ogni fonte resta l'ID LX3-xxxx.
+  Cosa e' cambiato nel RAG (rag.py, config.py):
+  - lettura del formato «Documento: LX3-xxxx», con tipo, giorno operativo e ora dal titolo;
+  - tipo di prova: copia (inoltro senza verifica), misura diretta, derivata (si basa su un altro documento), sentito dire;
+  - famiglie di copie: gli 80 inoltri del bollettino B-317 diventano UNA voce con il conteggio (= 1 fonte, non 80);
+  - codici interi nella ricerca: M362-065 non e' piu' M362, K391 non e' K319;
+  - salti sui codici rari (RAG_PASSAGGI = 3): corriere Ruggine -> pratica M362 -> lotto K391 -> armadio;
+  - giorno operativo nella domanda: i documenti di un altro giorno scendono (RAG_PESO_ALTRO_GIORNO);
+  - domande doppie cercate anche parte per parte; al massimo 2 file per tipo molto ripetuto (100 «Scheda di reparto»);
+  - catalogo per raccolte: il dossier (5 file) resta intero, i 500 registri sono riassunti per tipo, copie e misure;
+  - memoria: restano i file citati o nominati; quelli solo trovati valgono per la domanda dopo.
+  Vista RAG: nuove sezioni «Copie e misure dirette» e «Collegamenti tra documenti» (codici condivisi).
+  Domande su un file che non riguarda la storia (qualsiasi nome o argomento: «chi è Giulio Cesare?», «cos'è il
+  disprosio?», «parlami di Catania»): la ricerca passa al modello il testo di quel file (RAG_RUMORE_PERTINENTE) e ECO
+  risponde con quello che c'e' scritto, citando l'ID, e chiude con una frase: voce enciclopedica, non riguarda l'indagine.
+  Se l'argomento non e' in nessun file («chi era Napoleone?») dice che nei documenti non c'e' niente.
+  Velocita': saluti e chiacchiere («ciao», «grazie», «chi sei?», «cosa sai fare?») saltano la ricerca e usano un prompt
+  corto (CHIACCHIERE_VELOCI); il modello di embedding si carica all'avvio (riga «RAG: modello di embedding pronto»);
+  Gemini aspetta al massimo 12 s per tentativo e 30 s in tutto, e se Google e' sovraccarico (503) prova da solo
+  gli altri modelli di MODELLI_GEMINI_RISERVA con la stessa chiave.
+  LX3-4023 «Regole archivio» e' una fonte valida (descrive l'archivio, non da' ordini all'AI).
+  Misura: python valuta_rag.py (29 domande: le 19 del Giorno 3 + 10 sugli imprevisti, con riformulate e catena).

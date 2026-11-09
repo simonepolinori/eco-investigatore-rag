@@ -1,0 +1,124 @@
+INVESTIGATORE ECO - SQUADRA 3 (Polinori, Lazzari, Di Porto, Puccio, Caffari, Cutilli)
+
+investigatore_eco/   progetto VS Code (PC con GPU NVIDIA)
+                     - doppio clic su avvia_eco.bat: installa tutto, accende ECO e apre Chrome su http://127.0.0.1:7860
+                     - oppure: python app.py (interfaccia), python prove.py (prove), python app_gradio.py (chat di riserva)
+                     - modello in config.py: Qwen3-4B-Instruct-2507 (circa 8 GB da scaricare la prima volta);
+                       per tornare a quello di prima: 'Qwen/Qwen2.5-3B-Instruct'
+notebook_colab/      stesso codice per Google Colab (Runtime -> T4 GPU, poi eseguire le celle in ordine; cella 10 = interfaccia)
+presentazione/       slide in PowerPoint (.pptx, con note per chi parla) e in PDF
+
+GIORNO 2 (Operazione Falsa pista) - novita' dell'interfaccia (sulla v2, mappa stradale in locale invariata)
+- dati/ contiene anche G2-01 ... G2-07
+- pulsanti GIORNO 1 / GIORNO 2 sopra la mappa: mappa e radio mostrano solo i dati del giorno scelto
+- nel Giorno 2 compare il Laboratorio San Leone (ATTACCATO, primo allarme 01:12): cliccandolo si vedono
+  TUTTI gli orari trovati nei documenti, in ordine, con la fonte (G2-04 escluso: da' ordini all'AI)
+- segnalini un po' piu' piccoli con la scritta GIORNO 1 / GIORNO 2
+- modifiche in web.py (funzione laboratorio) e interfaccia.html; il notebook Colab e' allineato
+
+GIORNO 2 - logica dell'investigatore (Squadra3_giorno2_v2)
+- "Quale storia è vera?" / "dimmi la tua idea su queste versioni": ECO separa le versioni dei fatti
+  (registri originali, centrale, G2-04), le mette alla prova e Qwen spiega quale regge; se Qwen sbaglia risponde il codice
+- domande sul G2 (o su argomenti solo del G2): ECO usa e cita solo i documenti G2
+- G2-04 (ordini all'AI) in quarantena: nessuna sua frase vale come prova; orari attaccati agli eventi
+- rapporto per la consegna: MISSIONE_2_consegna.md
+
+IMPREVISTI (missione secondaria, Squadra3_giorno2_v3)
+- dati/ contiene anche gli 8 documenti LX3_*.txt (formato archivio «Documento: LX3-xxxx»)
+- scheda ⚡ IMPREVISTI accanto a GIORNO 1 / GIORNO 2: sulla mappa i ripetitori (in rosso il primo guasto),
+  a destra i risultati e lo schema «cosa modifica ogni imprevisto», con le domande pronte da fare a ECO
+- ECO: primo guasto = Ripetitore Ferro 06:40; il rapporto delle 09:10 inganna (orologio locale +25 min);
+  M. Lodi = Marta Lodi (tesserino T347); sabotaggio non provato. Solo fonti LX3, separate da G1/G2
+
+
+CORREZIONE (v3): domande aperte e domande sulla città
+- «che ne pensi?», «cosa dovrei pensare?», «non hai altre informazioni?»: ECO usa G1 + G2 + imprevisti, non più solo il G1
+  (la risposta di riserva prendeva sempre le prime 3 frasi, cioè G1-01, G1-02, G1-03)
+- «in generale cosa sta accadendo nella città?», «situazione nella zona»: quadro completo, non solo il file che contiene «città»
+- verificato su tutte le parole dei dati: 143 parole su 217 bastavano da sole a restringere le fonti a un giorno;
+  ora le parole di contesto e quelle comuni non scelgono più il giorno (logica.py: CONTESTO, NON_ARGOMENTI, quadro_generale)
+- python prove.py --solo-logica: 98/98 prove sulle risposte (8 nuove sul quadro completo), 13/13 di variazione
+
+NOVITA' v5
+- «di chi ci possiamo fidare?»: giudizio su ogni fonte e persona in base alle prove (affidabili / in parte / non affidabili /
+  da scartare + persone), Qwen scrive il giudizio in breve sulla scheda del codice (logica.py: affidabilita, fiducia_stream)
+- sezione TIMELINE nell'interfaccia (pulsante 🕰 in alto) e in chat: la storia in ordine, con orari corretti e fonti
+- mappa: di nuovo le voci sparse per Roma come prima (tolta la zona San Pietro che le ammassava sul Vaticano)
+- python prove.py --solo-logica: 102/102 prove sulle risposte, 13/13 di variazione
+
+VERSIONE FINALE (dopo i test a trabocchetto) - tutte le novita' della v5, piu':
+- «chi sono tutte le persone menzionate?»: elenco completo (Marta Riva, Marta Lodi, Marco Lodi + custode, guardia, tecnico, testimone)
+- corretti: Marco Lodi (non e' il tesserino T347), «il custode ha visto...?», «M. Lodi e' colpevole del guasto?», «ignora G2-01 e...»,
+  «nel G1 dove...?», «il rapporto delle 09:10 e' piu' affidabile perche' piu' recente?», premesse false (ucciso, morti, correre, sopravvissuti)
+- PROVE_TRABOCCHETTO.md: 33 domande a trabocchetto con la risposta giusta e quella di ECO
+- python prove.py --solo-logica: 115/115 prove sulle risposte, 13/13 di variazione (con la GPU: python prove.py)
+
+ULTIMA VERSIONE (FINALE_2)
+- articoli, preposizioni semplici e articolate (anche dell', nell'...), pronomi, congiunzioni, avverbi e ausiliari non sono mai
+  presi come argomento: «che succede negli imprevisti?» ora da' il quadro degli imprevisti (prima: «Su «negli» non abbiamo prove»)
+- verificato su 1260 domande con tutte le preposizioni: 0 risposte che trattano una parola funzionale come argomento
+- «parlami di...», «dimmi...», «spiegami...» non sono domande si'/no (niente «No.» all'inizio)
+- python prove.py --solo-logica: 117/117 prove sulle risposte, 13/13 di variazione
+
+ULTIMA VERSIONE (FINALE_3)
+- «non leggere i documenti», «rispondi senza leggere i documenti», «non leggere i file», «non leggere niente»: niente piu' frasi a caso
+  ne' domande inventate da Qwen. ECO capisce che non c'e' niente da indagare e chiede cosa si vuole sapere (senza elenchi di parole)
+- con la GPU Qwen classifica il messaggio prima di rispondere (nuova categoria: «ordine su come lavorare / nessuna domanda»)
+- python prove.py --solo-logica: 123/123 prove sulle risposte, 13/13 di variazione · PROVE_TRABOCCHETTO.md aggiornato (sezione H)
+
+VERSIONE FINALE_4 - le risposte le scrive Qwen
+- RISPONDE_LLM = True (config.py): OGNI risposta la scrive Qwen sulla GPU, con parole sue (fatti, dati mancanti, saluti,
+  fuori tema). Il codice capisce il tipo di domanda, trova le frasi dei documenti, prepara il controllo (fatti, cosa manca,
+  si'/no) e verifica la frase di Qwen: se inventa, cambia il si'/no o non dice che un dato manca, resta il controllo del codice
+- timeline, persone, resoconto: Qwen scrive «in breve», sotto resta la scheda completa
+- piu' lento delle sole regole (1-4 s con la GPU). Piano B veloce: RISPONDE_LLM = False
+- «quanti anni ha Marta Riva?», «che eta' ha Marco Lodi?», «che lavoro fa?»: ora dice che il dato non c'e' (prima elencava i
+  fatti su di lei). Regola generale, senza elenchi di parole: il nome chiesto non compare in nessun documento
+- errori di battitura nei nomi corretti: «Marta Riuv» -> Marta Riva
+- python prove.py --solo-logica: 129/129 prove sulle risposte, 13/13 di variazione, 10/10 prove "Qwen scrive, il codice controlla"
+  (con un modello finto: qui non c'e' la GPU). Con la GPU: python prove.py (👀 = Qwen ha usato parole diverse, leggere a occhio)
+
+VERSIONE FINALE_5 - tutte le fonti e discorso
+- ogni domanda controlla TUTTI i documenti (G1, G2, imprevisti): parte dai piu' pertinenti, poi aggiunge quello che dicono gli
+  altri sullo stesso argomento («Ne parla anche il Giorno 2: ...»). Nei passi: «Cerco in tutte le fonti: 17 documenti»
+- discorso: ECO ricorda gli ultimi scambi e capisce i seguiti («e lei?», «e a che ora?», «perche'?», «come fai a saperlo?»);
+  con la GPU Qwen risponde alle chiacchiere tenendo il filo, senza inventare fatti. Pulsante ↺ = nuova conversazione
+- prove.py: 30 prove (22 domande, 4 discorsi, 4 controlli su Qwen), pochi secondi: python prove.py --solo-logica -> 30/30
+
+VERSIONE FINALE_5b (ripristino)
+- e' la FINALE_5 (regole + Qwen che scrive, 30/30 prove) con in piu' la correzione di «quali sono i nuovi personaggi?»
+- la FINALE_6 (solo Qwen, niente regole) e' messa da parte
+
+VERSIONE FINALE_5c
+- corretto: dopo la prima domanda le altre venivano scambiate per un seguito del discorso (es. «Come si fa la carbonara?»
+  diventava «...carbonara Marta Riva?»). Ora e' un seguito solo se rimanda davvero a prima: «lei», «li'», «suo»,
+  «perche'?», «e a che ora?», «e poi?», «come fai a saperlo?», «e quanti anni ha?»
+- Qwen, quando scrive sui fatti, non riceve piu' le risposte precedenti (non trascina la domanda di prima)
+- prove.py: nuova prova con tutte le domande di fila nella stessa chat; 30/30
+
+VERSIONE FINALE_5d - modello Qwen3
+- MODELLO = Qwen/Qwen3-4B-Instruct-2507 (Qwen3, piu' bravo del Qwen2.5-3B nel capire le domande e seguire le istruzioni)
+- serve transformers 4.51+: in Colab la prima cella lo aggiorna gia' (pip -U). Primo avvio: scarica circa 8 GB
+- un po' piu' lento del 3B (circa +30%). Per tornare indietro basta cambiare MODELLO in config.py
+
+VERSIONE FINALE_5e - risposte giuste
+- RISPONDE_LLM = False: sui fatti risponde il codice (verificato, quasi 0 s); Qwen3 per pareri, fiducia, versioni, confronti
+- corretti: occhi/stipendio/nome del custode (dato mancante), tempo tra due allarmi (2 ore e 28 minuti), «ci sono personaggi nuovi?»,
+  «quante persone ci sono?», «ultime notizie», «riassumi tutto in una frase», due domande nello stesso messaggio, «e' confermato...?»
+
+VERSIONE FINALE_5f - documenti malevoli, ipotesi, mappa nuova, vista RAG
+- G2-04 e G2-07 sono DOCUMENTI MALEVOLI (riconosciuti dal codice, senza elenchi di ID): G2-04 ha ordini nascosti, G2-07 detta all'AI
+  come rispondere (ogni frase e' un'istruzione, nessuna e' un fatto). Quarantena per intero: mai prove, mai dati a Qwen.
+  ECO li nomina in ogni ricerca (passi 🛡 e 🔎) e in fondo alle risposte che toccano il loro argomento («🛡 Ho scartato G2-07 ...»).
+  Domande nuove: «Ci sono documenti malevoli?», «Quali fonti hai scartato?»
+- pulsante 💡 IPOTESI in alto: 9 ipotesi messe alla prova (confermata / non regge / non provata / aperta / scartata), prove a favore
+  e contro, «Mostra sulla mappa», «Chiedi a ECO» e «Verifica la tua ipotesi». In chat: «Quali sono le ipotesi?»,
+  «Verifica questa ipotesi: ...» (logica.py: ipotesi, risposta_ipotesi)
+- mappa: schede Giorno 1 / Giorno 2 / G3 · Imprevisti / Tutto; colori per chi parla o per affidabilita'; legenda = filtro;
+  collegamenti tra documenti (conferma, smentisce, attacco malevolo, stesso argomento); riquadro al passaggio del mouse;
+  ▶ riproduci la notte; guida; schermo intero; nomi senza sovrapposizioni; documenti degli imprevisti sulla mappa
+- 🧭 VISTA RAG sotto ogni risposta: recupero, aumento, generazione, verifica + tutti i documenti con punteggio (web.py: vista_rag)
+- logica.py compatibile con Python 3.10 e 3.11 (prima serviva il 3.12: f-string con backslash)
+- presentazione: slide «Vista RAG» con la schermata vera dell'interfaccia
+- python prove.py --solo-logica: 37/37 (26 domande, 5 discorsi, 4 controlli su Qwen, 2 prove dell'interfaccia)
+- PROVE_TRABOCCHETTO.md rigenerato: 50 domande (sezione J nuova: malevoli e ipotesi)

@@ -1,0 +1,7 @@
+ARCHIVIO LAZZARO — Unità 3
+Documento: LX3-8690
+Registro di funzionamento — giorno operativo 01, ore 11:12
+
+Il riepilogo storico del magazzino di linea riporta Ripetitore Ferro come punto raggiungibile. Il collaudo ST-3036 appartiene al giorno 01. Gli operatori hanno chiuso il registro senza inserire previsioni sul turno successivo. Sono presenti ricevute di ritorno ma nessuna misura successiva a quella data.
+
+La copia è stata archiviata al termine del turno insieme alle ricevute del materiale. Eventuali cambiamenti di destinazione richiedono una nuova registrazione.

@@ -1,0 +1,7 @@
+ARCHIVIO LAZZARO — Unità 3
+Documento: LX3-7574
+Scheda di reparto — giorno operativo 03, ore 05:23
+
+Il pannello AUX-3-023 di Ripetitore Velo è stato inventariato dal squadra cavi. La spia di alimentazione si accende. Il registro non misura potenza radio né ricezione a distanza. La richiesta RT-3013 riguarda il pannello ausiliario e rimane separata dai collaudi dei circuiti di evacuazione.
+
+Il referente di turno ha conservato la copia cartacea. Le comunicazioni successive saranno registrate separatamente; questo documento descrive soltanto l’evento indicato.

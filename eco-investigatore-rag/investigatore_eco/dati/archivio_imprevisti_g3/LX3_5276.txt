@@ -1,0 +1,7 @@
+ARCHIVIO LAZZARO — Unità 3
+Documento: LX3-5276
+Rettifica tecnica — giorno operativo 03, ore 08:30
+
+Oggetto: bollettino B-317 e segnale EV-341. Il bollettino usa lo stato del giorno precedente. Oggi Ripetitore Ferro è fuori servizio e non può trasmettere.
+Usare Ripetitore Velo, circuito CN-38.
+La rettifica è sostenuta dal collaudo di linea delle 08:20. Non tutte le copie inoltrate sono state aggiornate. Questa nota riguarda la rete secondaria, non il piano principale contro l’epidemia.

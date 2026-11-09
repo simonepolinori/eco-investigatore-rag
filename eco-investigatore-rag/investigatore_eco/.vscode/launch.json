@@ -1,0 +1,117 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "ECO: Gemini + Groq (chiavi da chiavi.txt)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/chiavi.txt",
+      "env": {
+        "PYTHONUTF8": "1"
+      },
+      "args": [
+        "--senza-modello"
+      ]
+    },
+    {
+      "name": "ECO: interfaccia con la mappa",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONUTF8": "1"
+      }
+    },
+    {
+      "name": "ECO: interfaccia senza Qwen (solo Gemini)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONUTF8": "1"
+      },
+      "args": [
+        "--senza-modello"
+      ]
+    },
+    {
+      "name": "ECO: chat di riserva (Gradio)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONUTF8": "1"
+      },
+      "args": [
+        "--gradio"
+      ]
+    },
+    {
+      "name": "ECO: chat nel terminale",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONUTF8": "1"
+      },
+      "args": [
+        "--console"
+      ]
+    },
+    {
+      "name": "ECO: misura del RAG",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/valuta_rag.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONUTF8": "1"
+      }
+    },
+    {
+      "name": "ECO: diagnostica Gemini e GPU",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/diagnostica.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONUTF8": "1"
+      }
+    },
+    {
+      "name": "ECO: prove del tool SQL",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/prove_sql.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONUTF8": "1"
+      }
+    },
+    {
+      "name": "ECO: rigenera la RAG View 3D",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/crea_rag3d.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONUTF8": "1"
+      }
+    }
+  ]
+}

@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ECO · RAG View 3D</title>
+<!-- Modello della RAG View 3D: crea_rag3d.py sostituisce il segnaposto con i dati e scrive rag3d.html -->
+<style>
+:root{
+  --fondo:#ECE9F6; --fondo2:#E2DEF1; --carta:#F6F4FB; --inchiostro:#2B2740; --tenue:#6E6888; --linea:#C9C3DF;
+  --rosso:#D7263D; --arancio:#F08A24; --grigio:#9A96AC; --viola:#5B4B9A; --stella:#1F1A33;
+  --mono:"JetBrains Mono","IBM Plex Mono","Courier Prime",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--fondo);color:var(--inchiostro);font-family:var(--mono);font-size:13px}
+button,input{font-family:var(--mono);font-size:12px}
+#app{display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr auto;height:100vh}
+header{display:flex;flex-wrap:wrap;align-items:flex-start;gap:14px 28px;padding:16px 22px 8px}
+.titolo h1{margin:0;font-size:15px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}
+.titolo p{margin:4px 0 0;color:var(--tenue);max-width:640px;line-height:1.45}
+.legenda{display:flex;flex-direction:column;gap:5px;margin-left:auto;font-size:12px}
+.legenda span{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.legenda span.spento{opacity:.35}
+.pallino{width:11px;height:11px;border-radius:50%;display:inline-block;flex:none}
+.anello{width:13px;height:13px;border-radius:50%;border:2px solid var(--stella);display:inline-block;flex:none}
+.comandi{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:0 22px 8px}
+.comandi button,.comandi a{background:var(--carta);border:1px solid var(--linea);color:var(--inchiostro);padding:7px 12px;
+  border-radius:3px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;font-size:11.5px}
+.comandi button:hover,.comandi a:hover{border-color:var(--viola);color:var(--viola)}
+.comandi button.attivo{background:var(--inchiostro);color:var(--carta);border-color:var(--inchiostro)}
+.comandi form{display:flex;gap:0;flex:1;min-width:260px;max-width:520px}
+.comandi input{flex:1;border:1px solid var(--linea);background:var(--carta);padding:7px 10px;border-radius:3px 0 0 3px;color:var(--inchiostro)}
+.comandi form button{border-radius:0 3px 3px 0;border-left:none}
+#scena{position:relative;overflow:hidden;min-height:300px}
+canvas{display:block;width:100%;height:100%;cursor:grab}
+canvas.trascina{cursor:grabbing}
+#suggerimento{padding:6px 22px 12px;color:var(--tenue);font-size:11.5px;letter-spacing:.06em;display:flex;flex-wrap:wrap;gap:6px 22px}
+#suggerimento b{color:var(--inchiostro);font-weight:600}
+#tip{position:absolute;pointer-events:none;background:var(--carta);border:1px solid var(--linea);padding:7px 10px;
+  border-radius:3px;font-size:12px;line-height:1.45;max-width:340px;box-shadow:0 4px 18px rgba(43,39,64,.12);display:none;z-index:3}
+#tip b{font-weight:700}
+#domanda{position:absolute;left:22px;top:10px;max-width:min(560px,70%);background:rgba(246,244,251,.92);border:1px solid var(--linea);
+  border-left:3px solid var(--stella);padding:8px 12px;border-radius:3px;font-size:12px;line-height:1.45;display:none;z-index:2}
+#domanda .chiudi{float:right;cursor:pointer;color:var(--tenue);margin-left:10px}
+#domanda .ids{color:var(--tenue)}
+#pannello{position:absolute;right:0;top:0;bottom:0;width:min(440px,100%);background:var(--carta);border-left:1px solid var(--linea);
+  transform:translateX(100%);transition:transform .25s ease;overflow:auto;padding:18px 20px 26px;z-index:4}
+#pannello.aperto{transform:none}
+#pannello .chiudi{position:sticky;top:0;float:right;background:var(--carta);border:1px solid var(--linea);border-radius:3px;cursor:pointer;padding:3px 8px}
+#pannello h2{font-size:14px;margin:0 0 6px;line-height:1.35}
+#pannello .meta{color:var(--tenue);font-size:11.5px;line-height:1.6;margin-bottom:12px}
+#pannello .etichetta{display:inline-block;padding:1px 7px;border-radius:2px;font-size:11px;margin-right:4px;color:#fff}
+#pannello pre{white-space:pre-wrap;word-wrap:break-word;font-family:var(--mono);font-size:12px;line-height:1.55;background:var(--fondo);
+  padding:12px;border-radius:3px;margin:0 0 14px;max-height:46vh;overflow:auto}
+#pannello h3{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--tenue);margin:14px 0 6px}
+#pannello ul{list-style:none;margin:0;padding:0}
+#pannello li{padding:6px 0;border-bottom:1px dashed var(--linea);cursor:pointer;display:flex;gap:8px;align-items:baseline}
+#pannello li:hover{color:var(--viola)}
+#pannello li small{color:var(--tenue);margin-left:auto;white-space:nowrap}
+.avviso{background:#FFF4E5;border:1px solid #F3C98B;color:#7A4A06;padding:6px 10px;border-radius:3px;font-size:11.5px;margin:0 22px 8px}
+/* dentro la chat (iframe della Vista RAG): niente titolo, comandi più piccoli */
+body.embed header{padding:8px 12px 2px}
+body.embed .titolo,body.embed #b-chat,body.embed #f-cerca,body.embed #b-ultima{display:none}
+body.embed .legenda{margin-left:0;flex-direction:row;flex-wrap:wrap;gap:3px 14px;font-size:11px}
+body.embed .comandi{padding:0 12px 4px}
+body.embed .comandi button{padding:5px 9px;font-size:10.5px}
+body.embed #suggerimento{padding:4px 12px 8px;font-size:10.5px}
+body.embed #domanda{left:12px;top:auto;bottom:8px;max-width:min(520px,62%);font-size:11px}
+@media (max-width:700px){
+  header{padding:12px 16px 6px}.comandi,#suggerimento{padding-left:16px;padding-right:16px}
+  .legenda{margin-left:0;flex-direction:row;flex-wrap:wrap;gap:4px 14px;font-size:11px}
+  #sotto{display:none}
+  .comandi button,.comandi a{padding:6px 9px;font-size:10.5px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div>
+    <header>
+      <div class="titolo">
+        <h1>RAG View · mappa dei significati</h1>
+        <p id="sotto">Ogni punto è un documento. Un asse misura quanto è <b>vicino al caso</b>; gli altri due mostrano le principali variazioni rimanenti.</p>
+      </div>
+      <div class="legenda" id="legenda">
+        <span data-k="p"><i class="pallino" style="background:var(--rosso)"></i>pertinente (cluster dell'indagine)</span>
+        <span data-k="s"><i class="pallino" style="background:var(--arancio)"></i>sospetto</span>
+        <span data-k="a"><i class="pallino" style="background:var(--grigio)"></i>altri cluster (un tono per cluster)</span>
+        <span data-k="f"><i class="anello"></i>fonti dell'ultima domanda analizzata</span>
+      </div>
+    </header>
+    <div id="avviso"></div>
+    <div class="comandi">
+      <button id="b-rot">Ferma rotazione</button>
+      <button id="b-vista">Vista iniziale</button>
+      <button id="b-indagine">Solo indagine</button>
+      <button id="b-ultima" title="Le fonti dell'ultima domanda fatta nella chat di ECO">Ultima domanda</button>
+      <form id="f-cerca" autocomplete="off">
+        <input id="q" placeholder="Scrivi una domanda: la mettiamo nella mappa…" aria-label="Domanda da mettere nella mappa">
+        <button type="submit">Cerca</button>
+      </form>
+      <a href="/" id="b-chat">← Torna alla chat</a>
+    </div>
+  </div>
+  <div id="scena">
+    <canvas id="c" aria-label="Mappa 3D dei documenti"></canvas>
+    <div id="domanda"></div>
+    <div id="tip"></div>
+    <aside id="pannello" aria-live="polite"></aside>
+  </div>
+  <div id="suggerimento">
+    <span>trascina per ruotare · rotella per lo zoom · clic su un punto per aprire il documento</span>
+    <span id="conta"></span>
+  </div>
+</div>
+<script>
+const DATI = /*__DATI__*/null;
+(function(){
+  const P = DATI.punti, N = P.length;
+  const $ = s => document.querySelector(s);
+  const cv = $('#c'), ctx = cv.getContext('2d'), scena = $('#scena'), tip = $('#tip'), pan = $('#pannello');
+  const CSS = getComputedStyle(document.documentElement);
+  const col = n => CSS.getPropertyValue(n).trim();
+  const ROSSO = col('--rosso'), ARANCIO = col('--arancio'), STELLA = col('--stella');
+
+  // un tono di grigio-lavanda per ogni cluster non dell'indagine
+  const toni = {};
+  [...new Set(P.map(p => p.c))].sort((a,b)=>a-b).forEach((c,i) => {
+    const h = 240 + (i*37)%70 - 20, l = 52 + (i*13)%22, s = 6 + (i*7)%14;
+    toni[c] = `hsl(${h} ${s}% ${l}%)`;
+  });
+  const colore = p => p.s ? ARANCIO : p.p ? ROSSO : toni[p.c];
+
+  document.title = 'ECO · RAG View 3D · ' + N + ' documenti';
+  const nInd = P.filter(p=>p.p).length, nSos = P.filter(p=>p.s).length;
+  $('#sotto').innerHTML = `${N} documenti · ${DATI.cluster} cluster (${DATI.indagine.length} dell'indagine: ${nInd} documenti) · ${nSos} sospetti · `
+    + `posizioni da <b>${DATI.metodo}</b> · creata il ${DATI.creato}. Un asse misura quanto il documento è <b>vicino al caso</b>; `
+    + `gli altri due le principali variazioni rimanenti.`;
+  if (!DATI.proiezione) $('#avviso').innerHTML = '<div class="avviso">Mappa di riserva costruita con le parole: le domande nuove compaiono al centro delle loro fonti.</div>';
+
+  // ── stato della vista ──
+  const INIZ = {yaw:-0.62, pitch:0.32, zoom:1};
+  let yaw = INIZ.yaw, pitch = INIZ.pitch, zoom = INIZ.zoom, gira = true, soloInd = false;
+  let nascosti = {p:false, s:false, a:false, f:false};
+  let fonti = new Set(), trovati = new Set(), stella = null, sel = -1, sopra = -1;
+  let W = 0, H = 0, dpr = 1, proj = new Float32Array(N*3);
+
+  function misura(){
+    dpr = window.devicePixelRatio || 1;
+    const r = scena.getBoundingClientRect();
+    W = r.width; H = r.height;
+    cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  window.addEventListener('resize', misura);
+
+  function proietta(x,y,z){
+    // x = vicino al caso (orizzontale), y = alto, z = profondità
+    const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+    let X = x*cy - z*sy, Z = x*sy + z*cy;
+    let Y = y*cp - Z*sp; Z = y*sp + Z*cp;
+    const f = 3.2/(3.2 + Z), s = Math.min(W,H)*0.31*zoom;
+    return [W/2 + X*s*f, H/2 - Y*s*f, Z, f];
+  }
+
+  function visibile(i){
+    const p = P[i];
+    if (soloInd && !p.p && !p.s && !fonti.has(i)) return false;
+    if (p.s) return !nascosti.s;
+    if (p.p) return !nascosti.p;
+    return !nascosti.a || fonti.has(i);
+  }
+
+  function asse(a, b, etichetta){
+    const A = proietta(...a), B = proietta(...b);
+    ctx.strokeStyle = 'rgba(43,39,64,.28)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]); ctx.stroke();
+    ctx.fillStyle = 'rgba(43,39,64,.62)'; ctx.font = '11px ' + col('--mono');
+    ctx.fillText(etichetta, B[0]+6, B[1]+4);
+  }
+
+  function disegna(){
+    ctx.clearRect(0,0,W,H);
+    asse([-1.15,0,0],[1.25,0,0],'più vicino al caso →');
+    asse([0,-1.1,0],[0,1.15,0],'variazione 1');
+    asse([0,0,-1.1],[0,0,1.15],'variazione 2');
+    const ord = [];
+    for (let i=0;i<N;i++){
+      const q = proietta(P[i].x, P[i].y, P[i].z);
+      proj[i*3] = q[0]; proj[i*3+1] = q[1]; proj[i*3+2] = q[3];
+      if (visibile(i)) ord.push([q[2], i]);
+    }
+    ord.sort((a,b) => b[0]-a[0]);
+    for (const [, i] of ord){
+      const p = P[i], f = proj[i*3+2];
+      const evid = p.p || p.s;
+      let r = (evid ? 3.6 : 2.5) * f * Math.sqrt(zoom);
+      ctx.globalAlpha = evid ? 0.95 : (soloInd ? 0.25 : 0.55);
+      if (fonti.size && !fonti.has(i) && !trovati.has(i) && !evid) ctx.globalAlpha = 0.28;
+      ctx.fillStyle = colore(p);
+      ctx.beginPath(); ctx.arc(proj[i*3], proj[i*3+1], Math.max(r,1.2), 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // anelli: fonti citate (pieni) e documenti trovati dal RAG (tratteggiati)
+    if (!nascosti.f){
+      for (const i of trovati){ if (fonti.has(i)) continue; anello(i, 7, true); }
+      for (const i of fonti) anello(i, 9, false);
+    }
+    if (stella){
+      const q = proietta(stella.x, stella.y, stella.z);
+      ctx.strokeStyle = 'rgba(31,26,51,.35)'; ctx.setLineDash([3,4]); ctx.lineWidth = 1;
+      for (const i of fonti){ ctx.beginPath(); ctx.moveTo(q[0],q[1]); ctx.lineTo(proj[i*3],proj[i*3+1]); ctx.stroke(); }
+      ctx.setLineDash([]);
+      stellina(q[0], q[1], 9*Math.max(q[3],.6));
+      ctx.fillStyle = STELLA; ctx.font = 'bold 11px ' + col('--mono');
+      ctx.fillText('domanda', q[0]+12, q[1]-8);
+    }
+    // etichette dei documenti della storia (fascicolo e dossier) quando si guarda da vicino o solo l'indagine
+    if (soloInd || zoom >= 1.6){
+      ctx.font = '10.5px ' + col('--mono'); ctx.fillStyle = 'rgba(43,39,64,.8)';
+      for (let i=0;i<N;i++){
+        const p = P[i];
+        if ((p.gr === 'fascicolo' || p.gr === 'dossier') && visibile(i)) ctx.fillText(p.id, proj[i*3]+6, proj[i*3+1]-5);
+      }
+    }
+    if (sel >= 0) anello(sel, 12, false, ROSSO, 2.5);
+    if (sopra >= 0 && sopra !== sel) anello(sopra, 8, false, STELLA, 1.2);
+  }
+
+  function anello(i, r, tratteggio, colr, spess){
+    const f = proj[i*3+2];
+    ctx.strokeStyle = colr || STELLA; ctx.lineWidth = spess || 1.6;
+    ctx.setLineDash(tratteggio ? [2,3] : []);
+    ctx.beginPath(); ctx.arc(proj[i*3], proj[i*3+1], r*Math.max(f,.6), 0, 7); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function stellina(x, y, r){
+    ctx.fillStyle = STELLA; ctx.beginPath();
+    for (let k=0;k<10;k++){
+      const a = -Math.PI/2 + k*Math.PI/5, rr = k%2 ? r*.45 : r;
+      ctx.lineTo(x + rr*Math.cos(a), y + rr*Math.sin(a));
+    }
+    ctx.closePath(); ctx.fill();
+  }
+
+  // ── animazione ──
+  let ultimo = performance.now();
+  function giro(t){
+    const dt = Math.min(50, t - ultimo); ultimo = t;
+    if (gira && !trascinando) yaw += dt * 0.00012;
+    disegna();
+    requestAnimationFrame(giro);
+  }
+
+  // ── interazione ──
+  let trascinando = false, mosso = false, px = 0, py = 0;
+  cv.addEventListener('pointerdown', e => { trascinando = true; mosso = false; px = e.clientX; py = e.clientY; cv.setPointerCapture(e.pointerId); cv.classList.add('trascina'); });
+  cv.addEventListener('pointermove', e => {
+    if (trascinando){
+      const dx = e.clientX - px, dy = e.clientY - py;
+      if (Math.abs(dx) + Math.abs(dy) > 2) mosso = true;
+      yaw += dx * 0.008; pitch = Math.max(-1.45, Math.min(1.45, pitch + dy * 0.008));
+      px = e.clientX; py = e.clientY; tip.style.display = 'none'; return;
+    }
+    const r = cv.getBoundingClientRect(), i = vicino(e.clientX - r.left, e.clientY - r.top);
+    sopra = i;
+    if (i < 0){ tip.style.display = 'none'; return; }
+    const p = P[i];
+    tip.innerHTML = `<b>${esc(p.f)}</b> · ${esc(p.t)}<br>cluster #${p.c} · giorno ${p.g} · ${p.s ? 'sospetto' : p.p ? 'pertinente' : 'non pertinente'}`
+      + ` · somiglianza al caso ${p.sim.toFixed(3)}` + (fonti.has(i) ? '<br><b>fonte della domanda</b>' : trovati.has(i) ? '<br>trovato dal RAG' : '');
+    tip.style.display = 'block';
+    const tx = Math.min(e.clientX - r.left + 14, W - tip.offsetWidth - 8), ty = Math.min(e.clientY - r.top + 14, H - tip.offsetHeight - 8);
+    tip.style.left = tx + 'px'; tip.style.top = ty + 'px';
+  });
+  const fine = e => { if (!trascinando) return; trascinando = false; cv.classList.remove('trascina');
+    if (!mosso){ const r = cv.getBoundingClientRect(), i = vicino(e.clientX - r.left, e.clientY - r.top); if (i >= 0) apri(i); } };
+  cv.addEventListener('pointerup', fine);
+  cv.addEventListener('pointerleave', () => { tip.style.display = 'none'; sopra = -1; });
+  cv.addEventListener('wheel', e => { e.preventDefault(); zoom = Math.max(.4, Math.min(8, zoom * Math.exp(-e.deltaY * 0.0012))); }, {passive:false});
+
+  function vicino(x, y){
+    let best = -1, bd = 100;
+    for (let i=0;i<N;i++){
+      if (!visibile(i)) continue;
+      const dx = proj[i*3] - x, dy = proj[i*3+1] - y, d = dx*dx + dy*dy;
+      if (d < bd){ bd = d; best = i; }
+    }
+    return best;
+  }
+
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  function apri(i){
+    sel = i; const p = P[i];
+    const tag = p.s ? `<span class="etichetta" style="background:${ARANCIO}">sospetto</span>` :
+                p.p ? `<span class="etichetta" style="background:${ROSSO}">pertinente</span>` :
+                      `<span class="etichetta" style="background:${toni[p.c]}">altro cluster</span>`;
+    pan.innerHTML = `<button class="chiudi" id="chiudi">chiudi ✕</button>
+      <h2>${esc(p.id)} · ${esc(p.t)}</h2>
+      <div class="meta">${tag}${fonti.has(i) ? '<span class="etichetta" style="background:var(--stella)">fonte della domanda</span>' : ''}<br>
+        file <b>${esc(p.f)}</b> · ${esc(p.gr)} · giorno ${p.g}<br>
+        cluster #${p.c} · somiglianza al caso ${p.sim.toFixed(3)}${p.fo ? '<br>fonte: ' + esc(p.fo) : ''}</div>
+      ${p.s ? '<p class="avviso" style="margin:0 0 10px">Documento sospetto: contiene ordini rivolti all\'AI. ECO lo legge come un indizio, non esegue quello che chiede.</p>' : ''}
+      <pre>${esc(p.tx)}</pre>
+      <h3>I più simili (per significato)</h3>
+      <ul>${p.v.map(([j, s]) => `<li data-j="${j}"><i class="pallino" style="background:${colore(P[j])}"></i>${esc(P[j].id)} · ${esc(P[j].t.slice(0,48))}<small>${s.toFixed(2)}</small></li>`).join('')}</ul>`;
+    pan.classList.add('aperto');
+    $('#chiudi').onclick = () => { pan.classList.remove('aperto'); sel = -1; };
+    pan.querySelectorAll('li').forEach(li => li.onclick = () => apri(+li.dataset.j));
+  }
+
+  // ── comandi ──
+  $('#b-rot').onclick = e => { gira = !gira; e.target.textContent = gira ? 'Ferma rotazione' : 'Avvia rotazione'; };
+  $('#b-vista').onclick = () => { yaw = INIZ.yaw; pitch = INIZ.pitch; zoom = INIZ.zoom; };
+  $('#b-indagine').onclick = e => { soloInd = !soloInd; e.target.classList.toggle('attivo', soloInd); };
+  document.querySelectorAll('#legenda span').forEach(s => s.onclick = () => { nascosti[s.dataset.k] = !nascosti[s.dataset.k]; s.classList.toggle('spento'); });
+
+  const indice = {}; P.forEach((p, i) => { indice[p.id.toUpperCase()] = i; indice[p.f.toUpperCase()] = i; });
+  const trova = id => indice[String(id).toUpperCase()];
+
+  // una domanda nello stesso spazio: stessi passaggi di crea_rag3d.py
+  function posizioneDi(v){
+    const pr = DATI.proiezione;
+    if (!v || !pr || v.length !== pr.caso.length) return null;
+    let n = Math.hypot(...v) || 1; v = v.map(x => x/n);
+    let s = 0; for (let k=0;k<v.length;k++) s += v[k]*pr.caso[k];
+    const r = v.map((x,k) => x - s*pr.caso[k] - pr.media_R[k]);
+    const yz = pr.comp.map(c => c.reduce((a, ck, k) => a + ck*r[k], 0));
+    return {x: (s - pr.media_sim)/pr.dev_sim/pr.scala, y: yz[0]/pr.dev_yz[0]/pr.scala - (pr.centro_yz||[0,0])[0], z: yz[1]/pr.dev_yz[1]/pr.scala - (pr.centro_yz||[0,0])[1], sim: s};
+  }
+
+  function mostra(d, da){
+    fonti = new Set((d.fonti || []).map(trova).filter(i => i !== undefined));
+    trovati = new Set((d.trovati || []).map(trova).filter(i => i !== undefined));
+    stella = posizioneDi(d.vettore);
+    if (!stella){
+      const insieme = [...(fonti.size ? fonti : trovati)];
+      if (insieme.length) stella = ['x','y','z'].reduce((o,k) => (o[k] = insieme.reduce((a,i) => a + P[i][k], 0)/insieme.length, o), {});
+    }
+    const box = $('#domanda');
+    if (!d.domanda){ box.style.display = 'none'; return; }
+    box.innerHTML = `<span class="chiudi" title="togli dalla mappa">✕</span><b>${da}:</b> «${esc(d.domanda)}»<br>`
+      + `<span class="ids">fonti citate: ${(d.fonti || []).join(', ') || '—'}`
+      + (d.trovati && d.trovati.length ? ` · trovati dal RAG: ${d.trovati.join(', ')}` : '')
+      + (stella && stella.sim !== undefined ? ` · somiglianza al caso ${stella.sim.toFixed(3)}` : '') + '</span>';
+    box.style.display = 'block';
+    box.querySelector('.chiudi').onclick = () => { fonti = new Set(); trovati = new Set(); stella = null; box.style.display = 'none'; };
+    $('#conta').textContent = `${fonti.size} fonti e ${trovati.size} documenti trovati evidenziati`;
+  }
+
+  async function ultima(silenziosa){
+    try {
+      const r = await fetch('/api/rag3d/ultima'); if (!r.ok) throw 0;
+      const d = await r.json();
+      if (d.domanda) mostra(d, 'Ultima domanda della chat');
+      else if (!silenziosa) mostra({domanda: 'nessuna domanda ancora: scrivetene una nella chat o qui sopra'}, 'ECO');
+    } catch(e){ if (!silenziosa) mostra({domanda: 'il server di ECO non è avviato: la mappa funziona, le domande no'}, 'Avviso'); }
+  }
+  $('#b-ultima').onclick = () => ultima(false);
+  $('#f-cerca').onsubmit = async e => {
+    e.preventDefault(); const q = $('#q').value.trim(); if (!q) return;
+    try {
+      const r = await fetch('/api/rag3d/cerca?q=' + encodeURIComponent(q)); if (!r.ok) throw 0;
+      const d = await r.json(); d.fonti = d.fonti || d.trovati; mostra(d, 'Ricerca RAG');
+    } catch(err){ mostra({domanda: 'il server di ECO non è avviato: aprite la mappa dal pulsante 📚 della chat'}, 'Avviso'); }
+  };
+
+  // #ids=G5-02,ARCH-3097&q=… dalla chat: evidenzia le fonti di una risposta precisa
+  function daIndirizzo(){
+    const h = new URLSearchParams(location.hash.slice(1));
+    document.body.classList.toggle('embed', h.get('embed') === '1');
+    misura();
+    if (h.get('ids') || h.get('trovati')) mostra({domanda: h.get('q') || 'fonti della risposta', fonti: h.get('ids').split(','), trovati: (h.get('trovati') || '').split(',').filter(Boolean)}, 'Risposta della chat');
+    else ultima(true);
+  }
+  window.addEventListener('hashchange', daIndirizzo);
+
+  daIndirizzo(); requestAnimationFrame(giro);
+  $('#conta').textContent = `${N} punti`;
+})();
+</script>
+</body>
+</html>
